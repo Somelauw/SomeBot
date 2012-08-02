@@ -8,6 +8,7 @@ from twisted.internet import reactor
 import plugin
 import plugin.basic
 import plugin.web
+import plugin.guess
 
 Info = namedtuple("Info", ["bot", "user", "channel"])
 
@@ -36,16 +37,18 @@ class Bot(irc.IRCClient):
         if msg and (is_directed or is_prefixed):
             parameters = msg.split()
             command = parameters.pop(0)
+            target = channel or user
 
             try:
                 info = Info(self, user, channel)
-                self.msg(channel, plugin.commands[command](info, *parameters))
+                self.msg(target, plugin.commands[command](info, *parameters))
             except KeyError:
-                self.msg(channel, "Unknown command #%s" % command)
-            except TypeError:
+                self.msg(target, "Unknown command #%s" % command)
+            except TypeError as e:
+                print e
                 argspec = inspect.getargspec(plugin.commands[command])
                 n_args = len(argspec.args) - 1
-                self.msg(channel, "Command #%s takes %d parameters" % (command, n_args))
+                self.msg(target, "Command #%s takes %d parameters" % (command, n_args))
 
 class BotFactory(protocol.ClientFactory):
     nickname = Bot.nickname
@@ -62,6 +65,6 @@ class BotFactory(protocol.ClientFactory):
         print "Could not connect: %s" % (reason,)
 
 if __name__ == "__main__":
-    reactor.connectTCP('irc.freenode.net', 6667, BotFactory("#SomeBot"))
-    reactor.connectTCP('irc.freenode.net', 6667, BotFactory("#python-forum"))
+    reactor.connectTCP('irc.freenode.net', 6667, BotFactory("#bots"))
+    #reactor.connectTCP('irc.freenode.net', 6667, BotFactory("#python-forum2"))
     reactor.run()

@@ -1,0 +1,4 @@
+SomeBot
+=======
+
+An irc bot

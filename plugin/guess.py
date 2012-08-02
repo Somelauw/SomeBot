@@ -7,18 +7,23 @@ class Guess():
     def reset(self):
         self.number = random.randint(0, 9)
     def guess(self, info, guess):
-        """Guess a number from 0 to 9"""
+        is_correct = guess == self.number
+        if is_correct:
+            self.reset()
+        return is_correct
 
+guess = Guess()
+
+@add_command
+def guess(info, guess):
+        """Guess a number from 0 to 9"""
         try:
             g = int(guess)
         except ValueError:
             return "Please read help"
 
-        if g == self.number:
-            self.reset()
+        if guess.guess(g):
             return "correct"
         else:
             return "incorrect"
 
-guess = Guess()
-add_command(guess.guess)

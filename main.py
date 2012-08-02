@@ -24,6 +24,7 @@ class Bot(irc.IRCClient):
         self.msg(channel, "Hello everybody, my command prefix is %s" % self.prefix)
 
     def privmsg(self, user, channel, msg):
+        print msg
         is_directed = msg.startswith(self.nickname)
         if is_directed:
             msg = msg.split(maxsplit=1)[1]
@@ -48,8 +49,10 @@ class Bot(irc.IRCClient):
 
 class BotFactory(protocol.ClientFactory):
     nickname = Bot.nickname
-    channel = "#python-forum"
     protocol = Bot
+
+    def __init__(self, channel):
+        self.channel = channel
 
     def clientConnectionLost(self, connector, reason):
         print "Lost connection (%s), reconnecting." % (reason,)
@@ -59,5 +62,6 @@ class BotFactory(protocol.ClientFactory):
         print "Could not connect: %s" % (reason,)
 
 if __name__ == "__main__":
-    reactor.connectTCP('irc.freenode.net', 6667, BotFactory())
+    reactor.connectTCP('irc.freenode.net', 6667, BotFactory("#SomeBot"))
+    reactor.connectTCP('irc.freenode.net', 6667, BotFactory("#python-forum"))
     reactor.run()

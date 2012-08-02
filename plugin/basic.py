@@ -5,14 +5,13 @@ from plugin import add_command
 def source(info):
     """Shows an url to the source"""
     
-    #return "Not published yet"
     return "https://github.com/Somelauw/SomeBot"
 
 @add_command
 def commands(info):
     """Shows available commands"""
 
-    return "Commands: " + ", ".join("#" + command for command in plugin.commands.keys())
+    return "Commands: " + ", ".join(info.bot.prefix + command for command in plugin.commands.keys())
 
 @add_command
 def help(info, command=None):
@@ -21,7 +20,7 @@ def help(info, command=None):
     if not command:
         return commands(info)
     else:
-        if command.startswith("#"):
+        if command.startswith(info.bot.prefix):
             command = command[1:]
         if command in plugin.commands:
             doc = plugin.commands[command].__doc__ or "No help available"

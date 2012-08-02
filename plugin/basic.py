@@ -8,17 +8,11 @@ def source(info):
     return "https://github.com/Somelauw/SomeBot"
 
 @add_command
-def commands(info):
-    """Shows available commands"""
-
-    return "Commands: " + ", ".join(info.bot.prefix + command for command in plugin.commands.keys())
-
-@add_command
 def help(info, command=None):
-    """Get help about a topic"""
+    """Get help about this bot"""
 
     if not command:
-        return commands(info)
+        return "Commands: " + ", ".join(plugin.commands.keys())
     else:
         if command.startswith(info.bot.prefix):
             command = command[1:]
@@ -26,5 +20,5 @@ def help(info, command=None):
             doc = plugin.commands[command].__doc__ or "No help available"
             return doc.split("\n")[0]
         else:
-            return "Unknown command #%s" % command
+            return "Unknown command %s" % command
 

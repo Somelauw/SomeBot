@@ -15,10 +15,12 @@ Info = namedtuple("Info", ["bot", "user", "channel"])
 class Bot(irc.IRCClient):
     nickname = "Somebot" 
     prefix = "#"
+    channels = ["bots", "python-forum2"]
 
     def signedOn(self):
-        self.join(self.factory.channel)
         print "Signed on as %s." % (self.nickname,)
+        for channel in self.channels:
+            self.join(channel)
 
     def joined(self, channel):
         print "Joined %s." % (channel,)
@@ -28,7 +30,7 @@ class Bot(irc.IRCClient):
         print msg
         is_directed = msg.startswith(self.nickname)
         if is_directed:
-            msg = msg.split(maxsplit=1)[1]
+            msg = msg.split(" ", 1)[1]
 
         is_prefixed = msg.startswith(self.prefix)
         if is_prefixed:
@@ -43,19 +45,15 @@ class Bot(irc.IRCClient):
                 info = Info(self, user, channel)
                 self.msg(target, plugin.commands[command](info, *parameters))
             except KeyError:
-                self.msg(target, "Unknown command #%s" % command)
+                self.msg(target, "Unknown command %s" % command)
             except TypeError as e:
                 print e
                 argspec = inspect.getargspec(plugin.commands[command])
                 n_args = len(argspec.args) - 1
-                self.msg(target, "Command #%s takes %d parameters" % (command, n_args))
+                self.msg(target, "Command %s takes %d parameters" % (command, n_args))
 
 class BotFactory(protocol.ClientFactory):
-    nickname = Bot.nickname
     protocol = Bot
-
-    def __init__(self, channel):
-        self.channel = channel
 
     def clientConnectionLost(self, connector, reason):
         print "Lost connection (%s), reconnecting." % (reason,)
@@ -65,6 +63,6 @@ class BotFactory(protocol.ClientFactory):
         print "Could not connect: %s" % (reason,)
 
 if __name__ == "__main__":
-    reactor.connectTCP('irc.freenode.net', 6667, BotFactory("#bots"))
-    #reactor.connectTCP('irc.freenode.net', 6667, BotFactory("#python-forum2"))
+    bot = BotFactory()
+    reactor.connectTCP('irc.freenode.net', 6667, bot)
     reactor.run()

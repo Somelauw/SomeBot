@@ -9,13 +9,15 @@ import plugin
 import plugin.basic
 import plugin.web
 import plugin.guess
+import plugin.mastermind
+import plugin.brainfuck
 
 Info = namedtuple("Info", ["bot", "user", "channel"])
 
 class Bot(irc.IRCClient):
     nickname = "Somebot" 
     prefix = "#"
-    channels = ["bots", "python-forum2"]
+    channels = ["bots", "python-forum"]
 
     def signedOn(self):
         print "Signed on as %s." % (self.nickname,)
@@ -25,6 +27,9 @@ class Bot(irc.IRCClient):
     def joined(self, channel):
         print "Joined %s." % (channel,)
         self.msg(channel, "Hello everybody, my command prefix is %s" % self.prefix)
+
+    #def reload(self):
+        #reload(plugin)
 
     def privmsg(self, user, channel, msg):
         print msg
@@ -39,9 +44,11 @@ class Bot(irc.IRCClient):
         if msg and (is_directed or is_prefixed):
             parameters = msg.split()
             command = parameters.pop(0)
+            print channel, user
             target = channel or user
 
             try:
+                user = user[:user.index("!")]
                 info = Info(self, user, channel)
                 self.msg(target, plugin.commands[command](info, *parameters))
             except KeyError:
@@ -51,6 +58,7 @@ class Bot(irc.IRCClient):
                 argspec = inspect.getargspec(plugin.commands[command])
                 n_args = len(argspec.args) - 1
                 self.msg(target, "Command %s takes %d parameters" % (command, n_args))
+                raise
 
 class BotFactory(protocol.ClientFactory):
     protocol = Bot

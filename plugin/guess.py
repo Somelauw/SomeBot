@@ -1,18 +1,18 @@
 import random
 from plugin import add_command
 
-class Guess():
+class Guesser():
     def __init__(self):
         self.reset()
     def reset(self):
         self.number = random.randint(0, 9)
-    def guess(self, info, guess):
+    def guess(self, guess):
         is_correct = guess == self.number
         if is_correct:
             self.reset()
         return is_correct
 
-guess = Guess()
+guesser = Guesser()
 
 @add_command
 def guess(info, guess):
@@ -22,7 +22,7 @@ def guess(info, guess):
         except ValueError:
             return "Please read help"
 
-        if guess.guess(g):
+        if guesser.guess(g):
             return "correct"
         else:
             return "incorrect"

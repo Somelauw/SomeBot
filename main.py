@@ -5,7 +5,7 @@ from twisted.internet import protocol
 from twisted.internet import reactor
 
 from plugin import pluginsystem
-pluginsystem.reload()
+pluginsystem.setup()
 
 Info = namedtuple("Info", ["bot", "user", "channel"])
 

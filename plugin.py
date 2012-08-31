@@ -5,9 +5,9 @@ import inspect
 
 class PluginSystem(object):
     def __init__(self):
-        pass
+        self.setup
 
-    def reload(self):
+    def setup(self):
         self.commands = {}
         self.modules = []
 
@@ -18,6 +18,8 @@ class PluginSystem(object):
             sys.path.append(pluginpath)
             self.plugins = [__import__(fname) for fname in pluginfiles]
 
+    def reload(self):
+        self.setup()
         for plugin in self.plugins:
             reload(plugin)
 

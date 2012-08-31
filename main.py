@@ -12,7 +12,7 @@ Info = namedtuple("Info", ["bot", "user", "channel"])
 class Bot(irc.IRCClient):
     nickname = "Somebot" 
     prefix = "#"
-    channels = ["bots", "python-forum2"]
+    channels = ["bots", "python-forum"]
 
     def signedOn(self):
         print "Signed on as %s." % (self.nickname,)

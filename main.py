@@ -1,23 +1,18 @@
-import inspect
 from collections import namedtuple
 
 from twisted.words.protocols import irc
 from twisted.internet import protocol
 from twisted.internet import reactor
 
-import plugin
-import plugin.basic
-import plugin.web
-import plugin.guess
-import plugin.mastermind
-import plugin.brainfuck
+from plugin import pluginsystem
+pluginsystem.reload()
 
 Info = namedtuple("Info", ["bot", "user", "channel"])
 
 class Bot(irc.IRCClient):
     nickname = "Somebot" 
     prefix = "#"
-    channels = ["bots", "python-forum"]
+    channels = ["bots", "python-forum2"]
 
     def signedOn(self):
         print "Signed on as %s." % (self.nickname,)
@@ -28,11 +23,16 @@ class Bot(irc.IRCClient):
         print "Joined %s." % (channel,)
         self.msg(channel, "Hello everybody, my command prefix is %s" % self.prefix)
 
-    #def reload(self):
-        #reload(plugin)
-
     def privmsg(self, user, channel, msg):
         print msg
+
+        user = user[:user.index("!")]
+
+        # This seems to behave inconsistently between different version of twisted.
+        # Therefore I present you this stupid hack.
+        if channel == self.nickname:
+            channel = None
+
         is_directed = msg.startswith(self.nickname)
         if is_directed:
             msg = msg.split(" ", 1)[1]
@@ -44,21 +44,10 @@ class Bot(irc.IRCClient):
         if msg and (is_directed or is_prefixed):
             parameters = msg.split()
             command = parameters.pop(0)
-            print channel, user
             target = channel or user
 
-            try:
-                user = user[:user.index("!")]
-                info = Info(self, user, channel)
-                self.msg(target, plugin.commands[command](info, *parameters))
-            except KeyError:
-                self.msg(target, "Unknown command %s" % command)
-            except TypeError as e:
-                print e
-                argspec = inspect.getargspec(plugin.commands[command])
-                n_args = len(argspec.args) - 1
-                self.msg(target, "Command %s takes %d parameters" % (command, n_args))
-                raise
+            info = Info(self, user, channel)
+            self.msg(target, pluginsystem.command(info, command, *parameters))
 
 class BotFactory(protocol.ClientFactory):
     protocol = Bot

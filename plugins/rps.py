@@ -21,6 +21,7 @@ def rps(info, choice):
     choice2 = random.choice(moves)
 
     if choice not in moves:
+        print "invalid", choice
         return "Not a valid move"
     elif choice == choice2:
         return "Draw"
